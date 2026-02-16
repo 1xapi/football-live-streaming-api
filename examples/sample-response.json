@@ -1,0 +1,106 @@
+{
+  "matches": [
+    {
+      "match_time": "1758385800",
+      "match_status": "live",
+      "home_team_name": "Manchester United",
+      "home_team_logo": "https://cdn.1xapi.com/images/teams/manchester-united.png",
+      "homeTeamScore": "2",
+      "away_team_name": "Chelsea",
+      "away_team_logo": "https://cdn.1xapi.com/images/teams/chelsea.png",
+      "awayTeamScore": "1",
+      "league_name": "Premier League",
+      "league_logo": "https://cdn.1xapi.com/images/leagues/premier-league.png",
+      "servers": [
+        {
+          "name": "Server 1",
+          "url": "https://stream1.example.com/live/epl-match-12345.m3u8",
+          "header": {
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+          },
+          "type": "direct"
+        },
+        {
+          "name": "Server 2",
+          "url": "https://stream2.example.com/live/epl-match-12345.mpd|drmScheme=clearkey&drmLicense=https://license.example.com/key",
+          "header": {
+            "user-agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+          },
+          "type": "drm"
+        },
+        {
+          "name": "Server 3",
+          "url": "https://stream3.example.com/live/epl-match-12345.m3u8",
+          "header": {
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "referer": "https://sportsportal.example.com/"
+          },
+          "type": "referer"
+        },
+        {
+          "name": "Server 4",
+          "url": "https://stream4.example.com/live/epl-match-12345.flv",
+          "header": {
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15"
+          },
+          "type": "direct"
+        },
+        {
+          "name": "Server 5",
+          "url": "https://stream5.example.com/live/epl-match-12345.m3u8",
+          "header": {
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+          },
+          "type": "direct"
+        }
+      ]
+    },
+    {
+      "match_time": "1758392400",
+      "match_status": "vs",
+      "home_team_name": "Real Madrid",
+      "home_team_logo": "https://cdn.1xapi.com/images/teams/real-madrid.png",
+      "homeTeamScore": "",
+      "away_team_name": "Barcelona",
+      "away_team_logo": "https://cdn.1xapi.com/images/teams/barcelona.png",
+      "awayTeamScore": "",
+      "league_name": "La Liga",
+      "league_logo": "https://cdn.1xapi.com/images/leagues/la-liga.png",
+      "servers": [
+        {
+          "name": "Server 1",
+          "url": "https://stream1.example.com/live/laliga-match-67890.m3u8",
+          "header": {
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+          },
+          "type": "direct"
+        },
+        {
+          "name": "Server 2",
+          "url": "https://stream2.example.com/live/laliga-match-67890.mpd|drmScheme=clearkey&drmLicense=https://license.example.com/key2",
+          "header": {
+            "user-agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36"
+          },
+          "type": "drm"
+        },
+        {
+          "name": "Server 3",
+          "url": "https://stream3.example.com/live/laliga-match-67890.m3u8",
+          "header": {
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "referer": "https://livesports.example.com/"
+          },
+          "type": "referer"
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "perPage": 20,
+    "total": 147,
+    "totalPages": 8,
+    "hasNext": true,
+    "hasPrev": false
+  }
+}

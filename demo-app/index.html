@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Football Live Streaming API - Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    body { background: #0f172a; color: #e2e8f0; font-family: 'Inter', system-ui, sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+    .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+    .badge-live { animation: pulse-live 2s infinite; }
+    @keyframes pulse-live { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    .loader { border: 3px solid #1e293b; border-top: 3px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .tab-active { background: #3b82f6; color: white; }
+    .tab-inactive { background: #1e293b; color: #94a3b8; }
+    .tab-inactive:hover { background: #334155; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useCallback } = React;
+
+    const API_BASE = "https://football-live-streaming-api.p.rapidapi.com";
+
+    function App() {
+      const [apiKey, setApiKey] = useState("");
+      const [connected, setConnected] = useState(false);
+      const [matches, setMatches] = useState([]);
+      const [pagination, setPagination] = useState(null);
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState("");
+      const [tab, setTab] = useState("all"); // all | live | vs
+      const [page, setPage] = useState(1);
+
+      const fetchMatches = useCallback(async (status, pageNum) => {
+        if (!apiKey.trim()) return;
+        setLoading(true);
+        setError("");
+
+        const params = new URLSearchParams({ page: pageNum });
+        if (status !== "all") params.set("status", status);
+
+        try {
+          const res = await fetch(`${API_BASE}/matches?${params}`, {
+            headers: {
+              "X-RapidAPI-Key": apiKey.trim(),
+              "X-RapidAPI-Host": "football-live-streaming-api.p.rapidapi.com",
+            },
+          });
+
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`);
+          }
+
+          const data = await res.json();
+          setMatches(data.matches || []);
+          setPagination(data.pagination || null);
+          setConnected(true);
+        } catch (err) {
+          setError(err.message);
+          setMatches([]);
+          setPagination(null);
+        } finally {
+          setLoading(false);
+        }
+      }, [apiKey]);
+
+      useEffect(() => {
+        if (connected) fetchMatches(tab, page);
+      }, [tab, page]);
+
+      const handleConnect = (e) => {
+        e.preventDefault();
+        setPage(1);
+        fetchMatches(tab, 1);
+      };
+
+      const formatTime = (timestamp) => {
+        if (!timestamp) return "";
+        const date = new Date(parseInt(timestamp) * 1000);
+        return date.toLocaleString(undefined, {
+          month: "short", day: "numeric",
+          hour: "2-digit", minute: "2-digit",
+        });
+      };
+
+      const getStatusBadge = (status) => {
+        if (status === "live") {
+          return (
+            <span className="badge-live inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-600 text-white">
+              <span className="w-2 h-2 bg-white rounded-full mr-1"></span>
+              LIVE
+            </span>
+          );
+        }
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-900 text-blue-300">
+            UPCOMING
+          </span>
+        );
+      };
+
+      return (
+        <div className="min-h-screen">
+          {/* Header */}
+          <header className="gradient-bg border-b border-gray-800 px-4 py-6">
+            <div className="max-w-6xl mx-auto">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
+                    <span>Football Live Streaming API</span>
+                  </h1>
+                  <p className="text-gray-400 mt-1 text-sm">
+                    Real-time matches with 2-13 streaming sources per match &middot; 50+ leagues
+                  </p>
+                </div>
+                <a
+                  href="https://rapidapi.com/football-live-streaming-api"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition flex-shrink-0"
+                >
+                  Subscribe on RapidAPI
+                </a>
+              </div>
+            </div>
+          </header>
+
+          <main className="max-w-6xl mx-auto px-4 py-6">
+            {/* API Key Input */}
+            {!connected && (
+              <form onSubmit={handleConnect} className="mb-8 bg-gray-800 rounded-xl p-6 border border-gray-700">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Enter your RapidAPI Key to get started
+                </label>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="text"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="paste your X-RapidAPI-Key here..."
+                    className="flex-1 bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!apiKey.trim() || loading}
+                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-semibold px-6 py-3 rounded-lg transition"
+                  >
+                    {loading ? "Connecting..." : "Connect"}
+                  </button>
+                </div>
+                <p className="text-gray-500 text-xs mt-2">
+                  Get your key from{" "}
+                  <a href="https://rapidapi.com/football-live-streaming-api" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">
+                    RapidAPI
+                  </a>
+                </p>
+              </form>
+            )}
+
+            {/* Error */}
+            {error && (
+              <div className="mb-6 bg-red-900 border border-red-700 rounded-lg p-4 text-red-200 text-sm">
+                {error}
+              </div>
+            )}
+
+            {/* Connected view */}
+            {connected && (
+              <>
+                {/* Connected badge + key display */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 bg-green-500 rounded-full"></span>
+                    <span className="text-green-400 text-sm font-medium">Connected</span>
+                    <span className="text-gray-500 text-sm">
+                      &middot; Key: {apiKey.slice(0, 8)}...{apiKey.slice(-4)}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => { setConnected(false); setMatches([]); setPagination(null); setApiKey(""); }}
+                    className="text-gray-400 hover:text-white text-sm underline"
+                  >
+                    Disconnect
+                  </button>
+                </div>
+
+                {/* Tabs */}
+                <div className="flex gap-2 mb-6">
+                  {[
+                    { key: "all", label: "All Matches" },
+                    { key: "live", label: "Live Now" },
+                    { key: "vs", label: "Upcoming" },
+                  ].map((t) => (
+                    <button
+                      key={t.key}
+                      onClick={() => { setTab(t.key); setPage(1); }}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                        tab === t.key ? "tab-active" : "tab-inactive"
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Loading */}
+                {loading && (
+                  <div className="flex justify-center py-16">
+                    <div className="loader"></div>
+                  </div>
+                )}
+
+                {/* Matches grid */}
+                {!loading && matches.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    {matches.map((match, i) => (
+                      <div
+                        key={i}
+                        className="card-hover bg-gray-800 rounded-xl border border-gray-700 p-4"
+                      >
+                        {/* League + Status */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            {match.league_logo && (
+                              <img
+                                src={match.league_logo}
+                                alt=""
+                                className="w-5 h-5 rounded"
+                                onError={(e) => e.target.style.display = "none"}
+                              />
+                            )}
+                            <span className="text-gray-400 text-xs font-medium truncate max-w-xs">
+                              {match.league_name}
+                            </span>
+                          </div>
+                          {getStatusBadge(match.match_status)}
+                        </div>
+
+                        {/* Teams */}
+                        <div className="flex items-center justify-between gap-3">
+                          {/* Home */}
+                          <div className="flex-1 text-center">
+                            {match.home_team_logo && (
+                              <img
+                                src={match.home_team_logo}
+                                alt=""
+                                className="w-10 h-10 mx-auto mb-1 rounded"
+                                onError={(e) => e.target.style.display = "none"}
+                              />
+                            )}
+                            <p className="text-white text-sm font-medium leading-tight">
+                              {match.home_team_name}
+                            </p>
+                          </div>
+
+                          {/* Score / Time */}
+                          <div className="flex-shrink-0 text-center px-3">
+                            {match.match_status === "live" ? (
+                              <div className="text-2xl font-bold text-white">
+                                {match.homeTeamScore} - {match.awayTeamScore}
+                              </div>
+                            ) : (
+                              <div className="text-lg font-semibold text-gray-400">VS</div>
+                            )}
+                            <div className="text-gray-500 text-xs mt-1">
+                              {formatTime(match.match_time)}
+                            </div>
+                          </div>
+
+                          {/* Away */}
+                          <div className="flex-1 text-center">
+                            {match.away_team_logo && (
+                              <img
+                                src={match.away_team_logo}
+                                alt=""
+                                className="w-10 h-10 mx-auto mb-1 rounded"
+                                onError={(e) => e.target.style.display = "none"}
+                              />
+                            )}
+                            <p className="text-white text-sm font-medium leading-tight">
+                              {match.away_team_name}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Servers */}
+                        <div className="mt-3 pt-3 border-t border-gray-700 flex items-center justify-between">
+                          <div className="flex gap-1.5 flex-wrap">
+                            {(match.servers || []).map((srv, j) => {
+                              const colors = {
+                                direct: "bg-green-900 text-green-300",
+                                drm: "bg-purple-900 text-purple-300",
+                                referer: "bg-yellow-900 text-yellow-300",
+                              };
+                              return (
+                                <span
+                                  key={j}
+                                  className={`text-xs px-1.5 py-0.5 rounded ${colors[srv.type] || "bg-gray-700 text-gray-300"}`}
+                                >
+                                  {srv.type}
+                                </span>
+                              );
+                            })}
+                          </div>
+                          <span className="text-gray-500 text-xs">
+                            {(match.servers || []).length} stream{(match.servers || []).length !== 1 ? "s" : ""}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Empty state */}
+                {!loading && matches.length === 0 && connected && (
+                  <div className="text-center py-16 text-gray-500">
+                    <p className="text-lg">No matches found for this filter.</p>
+                    <p className="text-sm mt-1">Try a different tab or check back later.</p>
+                  </div>
+                )}
+
+                {/* Pagination */}
+                {pagination && pagination.totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-4 mt-4 mb-8">
+                    <button
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={!pagination.hasPrev || loading}
+                      className="bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-white px-4 py-2 rounded-lg text-sm transition"
+                    >
+                      Previous
+                    </button>
+                    <span className="text-gray-400 text-sm">
+                      Page {pagination.page} of {pagination.totalPages}
+                      <span className="text-gray-600 ml-2">({pagination.total} matches)</span>
+                    </span>
+                    <button
+                      onClick={() => setPage((p) => p + 1)}
+                      disabled={!pagination.hasNext || loading}
+                      className="bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-white px-4 py-2 rounded-lg text-sm transition"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Features section (shown when not connected) */}
+            {!connected && !loading && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
+                {[
+                  { title: "Real-time Data", desc: "Live match data updated every minute with scores and status." },
+                  { title: "2-13 Streams", desc: "Multiple streaming sources per match for maximum reliability." },
+                  { title: "50+ Leagues", desc: "Premier League, La Liga, Serie A, Bundesliga, Champions League, and more." },
+                  { title: "Stream Types", desc: "Direct HLS/FLV, DRM-protected MPEG-DASH, and referer-based streams." },
+                  { title: "Smart Filtering", desc: "Filter by status, date, stream type, and league with pagination." },
+                  { title: "Edge Performance", desc: "Global CDN with ~50ms response time and 99.9% uptime." },
+                ].map((f, i) => (
+                  <div key={i} className="bg-gray-800 border border-gray-700 rounded-xl p-5">
+                    <h3 className="text-white font-semibold mb-1">{f.title}</h3>
+                    <p className="text-gray-400 text-sm">{f.desc}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </main>
+
+          {/* Footer */}
+          <footer className="border-t border-gray-800 mt-8 py-6 text-center text-gray-500 text-sm">
+            Football Live Streaming API &middot;{" "}
+            <a href="https://rapidapi.com/football-live-streaming-api" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+              Subscribe on RapidAPI
+            </a>
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
