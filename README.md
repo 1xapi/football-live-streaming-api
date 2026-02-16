@@ -1,6 +1,6 @@
 # Football Live Streaming API
 
-[![RapidAPI](https://img.shields.io/badge/RapidAPI-Subscribe-blue?style=for-the-badge&logo=rapidapi)](https://rapidapi.com/football-live-streaming-api)
+[![RapidAPI](https://img.shields.io/badge/RapidAPI-Subscribe-blue?style=for-the-badge&logo=rapidapi)](https://rapidapi.com/1xapi-rapid-team/api/football-live-streaming-api)
 [![Status](https://img.shields.io/badge/Status-Online-brightgreen?style=for-the-badge)]()
 [![Uptime](https://img.shields.io/badge/Uptime-99.9%25-brightgreen?style=for-the-badge)]()
 
@@ -24,7 +24,7 @@ Real-time football match data with **2-13 streaming sources per match** across *
 
 ### 1. Subscribe on RapidAPI
 
-Get your API key at: **[rapidapi.com/football-live-streaming-api](https://rapidapi.com/football-live-streaming-api)**
+Get your API key at: **[rapidapi.com/1xapi-rapid-team/api/football-live-streaming-api](https://rapidapi.com/1xapi-rapid-team/api/football-live-streaming-api)**
 
 ### 2. Make your first request
 
